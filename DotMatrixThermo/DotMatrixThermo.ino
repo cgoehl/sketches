@@ -1,9 +1,13 @@
 //www.elegoo.com
 //2016.06.13
 
-//We always have to include the library
 #include "LedControl.h"
 
+#include <Wire.h>
+#include <DS3231.h>
+
+DS3231 clock;
+RTCDateTime dt;
 /*
  Now we need a LedControl to work with.
  ***** These pin numbers will probably not work with your hardware *****
@@ -12,7 +16,7 @@
  pin 10 is connected to LOAD 
  We have only a single MAX72XX.
  */
-LedControl lc=LedControl(12,11,10,1);
+LedControl lc=LedControl(7,6,5,1);
 
 #include <SimpleDHT.h>
 
@@ -24,6 +28,10 @@ int pinDHT11 = 2;
 SimpleDHT11 dht11;
 
 void setup() {
+  Serial.begin(9600);
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
   /*
    The MAX72XX is in power-saving mode on startup,
    we have to do a wakeup call
@@ -33,6 +41,10 @@ void setup() {
   lc.setIntensity(0,1);
   /* and clear the display */
   lc.clearDisplay(0);
+  
+  clock.begin();
+  // Set sketch compiling time
+  clock.setDateTime(__DATE__, __TIME__);
 }
 
 byte Font5x7[] = {
@@ -173,18 +185,12 @@ void printTempHumid() {
   char tempString[30];
   sprintf(tempString, "%dC %dH", temperature, humidity);
   printString(tempString);
-  
-//  Serial.print("Sample OK: ");
-//  Serial.print((int)temperature); Serial.print(" *C, ");
-//  Serial.print((int)humidity); Serial.println(" %");
-//  
 //  // DHT11 sampling rate is 1HZ.
 //  delay(1000);
 }
 
 
 void loop() {
-//  printString("HALLO WIR GOEHLS. WIR SIND EINE TOLLE FAMILIE!");
   printTempHumid();
 }
 
